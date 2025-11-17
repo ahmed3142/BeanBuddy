@@ -1,26 +1,52 @@
 // src/app/profile/[username]/page.js
-import { getPublicProfileByUsername, getPublicCoursesByUsername } from '../../lib/api'; // <-- NOTUN IMPORT
+"use client"; // <-- Shobcheye joruri line!
+
+import { useEffect, useState } from 'react';
+import { getPublicProfileByUsername, getPublicCoursesByUsername } from '../../lib/api'; 
 import Link from 'next/link'; 
+import { useParams } from 'next/navigation'; // <-- Notun import
 
-// Next.js 16 (Turbopack) er jonno
-async function loadData(props) {
-  const params = await props.params;
+export default function PublicProfilePage() {
+  
+  const params = useParams(); // <-- `useParams` hook use korte hobe
   const { username } = params;
-  
-  try {
-    // Ekhon duita API call hobe
-    const profile = await getPublicProfileByUsername(username);
-    const courses = await getPublicCoursesByUsername(username); // <-- NOTUN API CALL
-    return { profile, courses, error: null, username };
-  } catch (err) {
-    return { profile: null, courses: [], error: err.message, username };
+
+  // State-gulo ekhane define kora
+  const [profile, setProfile] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Data fetch korar jonno useEffect
+  useEffect(() => {
+    if (!username) return; // Jodi ekhono username na pay
+
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        // Ekhon duita API call hobe
+        const profileData = await getPublicProfileByUsername(username);
+        const coursesData = await getPublicCoursesByUsername(username); 
+        
+        setProfile(profileData);
+        setCourses(coursesData);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+        setProfile(null);
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [username]); // `username` change hole-i shudhu data load korbe
+
+  if (loading) {
+    return <div style={{textAlign: 'center', padding: '40px'}}>Loading profile...</div>;
   }
-}
-
-export default async function PublicProfilePage(props) {
   
-  const { profile, courses, error, username } = await loadData(props); // <-- courses ekhon ekhane
-
   if (error) {
     return <div style={{textAlign: 'center', padding: '40px', color: 'red'}}>Error: Could not find user '{username}'</div>;
   }
@@ -49,7 +75,6 @@ export default async function PublicProfilePage(props) {
         </div>
       </div>
       
-      {/* --- EI SECTION-TA UPDATE KORA HOYECHE --- */}
       <div className="card">
         <h2>Courses by {profile.username}</h2>
         {courses.length > 0 ? (
