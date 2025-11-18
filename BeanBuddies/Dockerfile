@@ -19,6 +19,7 @@ RUN mvn package -DskipTests
 # Stage 2: Create the final runtime image
 FROM eclipse-temurin:17-jre-jammy
 
+# Set a working directory
 WORKDIR /app
 
 # Copy the built JAR file from the 'build' stage
@@ -27,5 +28,6 @@ COPY --from=build /app/target/BeanBuddies-0.0.1-SNAPSHOT.jar app.jar
 # Expose the port
 EXPOSE 8081
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+# --- EIKHANE CHANGE KORA HOYECHE ---
+# Run the application using a relative path (relies on WORKDIR /app)
+ENTRYPOINT ["java", "-jar", "app.jar"]
