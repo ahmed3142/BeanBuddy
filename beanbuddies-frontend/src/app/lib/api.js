@@ -4,8 +4,8 @@
 
 // 1. Define both URLs
 const PROD_API_URL = 'https://georgiann-unbribing-elderly.ngrok-free.dev/api/v1'; // For Vercel
-const DEV_API_URL = 'http://localhost:8081/api/v1'; // For your local machine
-
+// const DEV_API_URL = 'http://localhost:8081/api/v1'; // For your local machine
+const PROD_API_URL = 'https://https://beanbuddy-2.onrender.com/api/v1'; 
 // 2. Check which environment we are in
 const API_URL = process.env.NODE_ENV === 'production' 
     ? PROD_API_URL   // Use ngrok if on Vercel
