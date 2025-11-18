@@ -3,20 +3,23 @@
 // --- DYNAMIC API URL LOGIC ---
 
 // 1. Define both URLs
-const PROD_API_URL = 'https://georgiann-unbribing-elderly.ngrok-free.dev/api/v1'; // For Vercel
-// const DEV_API_URL = 'http://localhost:8081/api/v1'; // For your local machine
-const PROD_API_URL = 'https://https://beanbuddy-2.onrender.com/api/v1'; 
+// Eita apnar Render Backend URL (Production-er jonno)
+const PROD_API_URL = 'https://beanbuddy-2.onrender.com/api/v1'; 
+
+// Eita apnar Local Backend URL (Nijer computer-e kaj korar jonno)
+const DEV_API_URL = 'http://localhost:8081/api/v1'; 
+
 // 2. Check which environment we are in
 const API_URL = process.env.NODE_ENV === 'production' 
-    ? PROD_API_URL   // Use ngrok if on Vercel
-    : DEV_API_URL;   // Use localhost if on your machine
+    ? PROD_API_URL   // Vercel-e thakle Render use korbe
+    : DEV_API_URL;   // Local-e thakle Localhost use korbe
 
 // --- END OF DYNAMIC LOGIC ---
 
 
 /**
  * Fetches data from protected endpoints.
- * Automatically adds Authorization header and ngrok-skip header.
+ * Automatically adds Authorization header.
  */
 async function fetchProtected(url, token, options = {}) {
   const response = await fetch(`${API_URL}${url}`, {
@@ -25,7 +28,6 @@ async function fetchProtected(url, token, options = {}) {
       ...options.headers,
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`, 
-      'ngrok-skip-browser-warning': 'true' // Skip ngrok warning
     },
   });
   
@@ -41,14 +43,12 @@ async function fetchProtected(url, token, options = {}) {
 
 /**
  * Fetches data from public endpoints.
- * Automatically adds ngrok-skip header.
  */
 async function fetchPublic(url, options = {}) {
   const response = await fetch(`${API_URL}${url}`, {
     ...options,
     headers: {
       ...options.headers,
-      'ngrok-skip-browser-warning': 'true' // Skip ngrok warning
     }
   });
   
@@ -87,9 +87,7 @@ export const getMyDashboard = (token) => {
   return fetchProtected('/users/me/dashboard', token);
 };
 
-// --- !!! EIKHANE SHOTHIK KORA HOYECHE !!! ---
 export const getMyProfile = (token) => {
-  // Ashol endpoint-ti CourseController-e ache
   return fetchProtected('/courses/my-profile', token); 
 };
 
@@ -119,6 +117,7 @@ export const checkEnrollmentStatus = (token, courseId) => {
 };
 
 export const initiatePayment = (token, courseId) => {
+  // Frontend ekhon nijer URL-ta backend-ke pathiye dibe (Success/Fail redirect er jonno)
   const requestBody = {
     frontendBaseUrl: window.location.origin 
   };
