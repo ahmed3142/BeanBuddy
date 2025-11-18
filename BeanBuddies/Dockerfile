@@ -30,4 +30,4 @@ EXPOSE 8081
 
 # --- EIKHANE CHANGE KORA HOYECHE ---
 # Run the application using a relative path (relies on WORKDIR /app)
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=$PORT"]
