@@ -1,15 +1,9 @@
-// app/payment/success/page.js
+// File Path: app/payment/thank-you/page.js
 "use client";
 
 import Link from 'next/link';
-import { useEffect } from 'react';
 
 export default function PaymentSuccessPage() {
-
-  // Optional: Ekhane amra backend-ke call kore
-  // payment status double-check korte pari,
-  // kintu main validation IPN diyei hobe.
-
   return (
     <div style={{
       textAlign: 'center',
@@ -24,7 +18,7 @@ export default function PaymentSuccessPage() {
         Payment Successful!
       </h1>
       <p style={{ fontSize: '1.1rem', color: '#333', marginBottom: '2rem' }}>
-        Thank you! You have been successfully enrolled in the course.
+        Thank you! Your enrollment is being processed.
       </p>
       <Link href="/dashboard" className="btn btn-primary">
         Go to My Dashboard
