@@ -3,7 +3,7 @@
 // The base URL for your Spring Boot API
 // const API_URL = 'http://localhost:8081/api/v1';
 
-const API_URL = 'http://localhost:8081/api/v1';
+const API_URL = 'https://georgiann-unbribing-elderly.ngrok-free.dev/api/v1';
 
 async function fetchProtected(url, token, options = {}) {
   // ... (baki code same)
