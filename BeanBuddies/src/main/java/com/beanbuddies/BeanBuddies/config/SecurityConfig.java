@@ -77,20 +77,18 @@ public class SecurityConfig {
     
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-        // --- EIKHANE CHANGE KORA HOYECHE ---
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // 1. Amader localhost-ke allow kora
         configuration.setAllowedOrigins(List.of("http://localhost:3000")); 
-        
-        // --- EI NOTUN LINE-GULO ADD KORA HOYECHE ---
-        // 2. Vercel theke asha shob request allow kora
         configuration.addAllowedOriginPattern("https://*.vercel.app");
-        // 3. NGROK theke test korar jonno (jodi dorkar hoy)
         configuration.addAllowedOriginPattern("https://*.ngrok-free.dev");
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        
+        // --- EI LINE-TI UPDATE KORA HOYECHE ---
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "ngrok-skip-browser-warning"));
+        // --- END OF CHANGE ---
+
         configuration.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

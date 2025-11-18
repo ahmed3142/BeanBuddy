@@ -1,7 +1,5 @@
 // app/lib/api.js
 
-// --- EIKHANE SHOB LOGIC ADD KORA HOYECHE ---
-
 // 1. Define both URLs
 const PROD_API_URL = 'https://georgiann-unbribing-elderly.ngrok-free.dev/api/v1'; // For Vercel
 const DEV_API_URL = 'http://localhost:8081/api/v1'; // For your local machine
@@ -11,17 +9,16 @@ const API_URL = process.env.NODE_ENV === 'production'
     ? PROD_API_URL   // Use ngrok if on Vercel
     : DEV_API_URL;   // Use localhost if on your machine
 
-// --- END OF NEW LOGIC ---
-
 
 async function fetchProtected(url, token, options = {}) {
-  // ... (baki shob code 100% eki thakbe) ...
   const response = await fetch(`${API_URL}${url}`, {
     ...options,
     headers: {
       ...options.headers,
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`, 
+      // --- EI NOTUN HEADER-TA ADD KORA HOYECHE ---
+      'ngrok-skip-browser-warning': 'true'
     },
   });
   if (!response.ok) {
@@ -35,24 +32,42 @@ async function fetchProtected(url, token, options = {}) {
 
 // --- Public API Functions (No token needed) ---
 export const getPublicCourses = async () => {
-  const res = await fetch(`${API_URL}/courses/public/all`);
+  const res = await fetch(`${API_URL}/courses/public/all`, {
+    headers: {
+      // --- EI NOTUN HEADER-TA ADD KORA HOYECHE ---
+      'ngrok-skip-browser-warning': 'true'
+    }
+  });
   if (!res.ok) throw new Error('Failed to fetch courses');
   return res.json();
 };
+
 export const getPublicProfileByUsername = async (username) => {
-  const res = await fetch(`${API_URL}/users/public/${username}`);
+  const res = await fetch(`${API_URL}/users/public/${username}`, {
+    headers: {
+      // --- EI NOTUN HEADER-TA ADD KORA HOYECHE ---
+      'ngrok-skip-browser-warning': 'true'
+    }
+  });
   if (!res.ok) throw new Error('Failed to fetch profile');
   return res.json();
 };
+
 export const getPublicCoursesByUsername = async (username) => {
-  const res = await fetch(`${API_URL}/courses/public/by/{username}`);
+  const res = await fetch(`${API_URL}/courses/public/by/{username}`, {
+    headers: {
+      // --- EI NOTUN HEADER-TA ADD KORA HOYECHE ---
+      'ngrok-skip-browser-warning': 'true'
+    }
+  });
   if (!res.ok) throw new Error('Failed to fetch courses');
   return res.json();
 };
 
-// ... (baki shob API function jemon chilo temon-i thakbe) ...
-
 // --- Protected API Functions (Token required) ---
+// ... (baki shob function-e kono change hobe na, karon tara `fetchProtected` call kore,
+// jekhane amra already header-ti add kore diyechi) ...
+
 export const getCourseDetails = (token, id) => {
   return fetchProtected(`/courses/${id}`, token);
 };
