@@ -1,12 +1,21 @@
 // app/lib/api.js
 
-// The base URL for your Spring Boot API
-// const API_URL = 'http://localhost:8081/api/v1';
+// --- EIKHANE SHOB LOGIC ADD KORA HOYECHE ---
 
-const API_URL = 'https://georgiann-unbribing-elderly.ngrok-free.dev/api/v1';
+// 1. Define both URLs
+const PROD_API_URL = 'https://georgiann-unbribing-elderly.ngrok-free.dev/api/v1'; // For Vercel
+const DEV_API_URL = 'http://localhost:8081/api/v1'; // For your local machine
+
+// 2. Check which environment we are in
+const API_URL = process.env.NODE_ENV === 'production' 
+    ? PROD_API_URL   // Use ngrok if on Vercel
+    : DEV_API_URL;   // Use localhost if on your machine
+
+// --- END OF NEW LOGIC ---
+
 
 async function fetchProtected(url, token, options = {}) {
-  // ... (baki code same)
+  // ... (baki shob code 100% eki thakbe) ...
   const response = await fetch(`${API_URL}${url}`, {
     ...options,
     headers: {
@@ -41,10 +50,9 @@ export const getPublicCoursesByUsername = async (username) => {
   return res.json();
 };
 
-// --- Protected API Functions (Token required) ---
+// ... (baki shob API function jemon chilo temon-i thakbe) ...
 
-// --- EI FUNCTION-TA UPDATE KORA HOYECHE ---
-// Ekhon eita protected ebong token pathay
+// --- Protected API Functions (Token required) ---
 export const getCourseDetails = (token, id) => {
   return fetchProtected(`/courses/${id}`, token);
 };
@@ -122,8 +130,6 @@ export const markLessonComplete = (token, lessonId) => {
     method: 'POST',
   });
 };
-
-// --- EI NOTUN FUNCTION-TA ADD KORA HOYECHE ---
 export const initiatePayment = (token, courseId) => {
   return fetchProtected(`/payment/initiate/${courseId}`, token, {
     method: 'POST',
