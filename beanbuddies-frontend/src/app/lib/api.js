@@ -73,7 +73,6 @@ export const getPublicProfileByUsername = (username) => {
 };
 
 export const getPublicCoursesByUsername = (username) => {
-  // Note: Backend endpoint-e {username} chilo, ota remove kora hoyeche
   return fetchPublic(`/courses/public/by/${username}`);
 };
 
@@ -88,9 +87,10 @@ export const getMyDashboard = (token) => {
   return fetchProtected('/users/me/dashboard', token);
 };
 
+// --- !!! EIKHANE SHOTHIK KORA HOYECHE !!! ---
 export const getMyProfile = (token) => {
-  // Note: Backend endpoint-ti /users/me chilo, /courses/my-profile na
-  return fetchProtected('/users/me', token); 
+  // Ashol endpoint-ti CourseController-e ache
+  return fetchProtected('/courses/my-profile', token); 
 };
 
 export const updateMyProfile = (token, updateData) => {
@@ -119,7 +119,6 @@ export const checkEnrollmentStatus = (token, courseId) => {
 };
 
 export const initiatePayment = (token, courseId) => {
-  // Frontend ekhon nijer URL-ta backend-ke pathiye dibe
   const requestBody = {
     frontendBaseUrl: window.location.origin 
   };
