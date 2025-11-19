@@ -63,7 +63,9 @@ public class SecurityConfig {
                         
                         .requestMatchers(HttpMethod.POST, "/api/v1/lessons/{lessonId}/complete").authenticated()
 
-                        .anyRequest().authenticated()
+                        // --- EIKHANE CHANGE KORA HOYECHE ---
+                        .anyRequest().permitAll() // TEMPORARILY MAKE EVERYTHING PUBLIC
+                        // --- END OF CHANGE ---
                 )
                 
                 .sessionManagement(session -> 
@@ -84,10 +86,7 @@ public class SecurityConfig {
         configuration.addAllowedOriginPattern("https://*.ngrok-free.dev");
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        
-        // --- EI LINE-TI UPDATE KORA HOYECHE ---
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "ngrok-skip-browser-warning"));
-        // --- END OF CHANGE ---
 
         configuration.setAllowCredentials(true);
         
