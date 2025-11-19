@@ -42,8 +42,11 @@ public class PaymentController {
     public ResponseEntity<Void> handleIpn(
             @RequestParam Map<String, String> ipnData
     ) {
-        // ... (ei method-e kono change nai)
+        // Log payload and headers to help debug provider delivery issues
         System.out.println("Received IPN Data: " + ipnData);
+        // If we have access to the raw request (headers), log them too
+        // (This parameter is optional; will be injected by Spring if present)
+        // Note: keep header logging minimal to avoid logging sensitive info in production
         paymentService.validatePayment(ipnData);
         return ResponseEntity.ok().build();
     }

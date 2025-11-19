@@ -10,4 +10,7 @@ public interface PaymentTransactionRepository extends JpaRepository<PaymentTrans
     
     Optional<PaymentTransaction> findByTransactionId(String transactionId);
 
+    // Allow lookup by session key (value returned by SSLCommerz on session creation)
+    Optional<PaymentTransaction> findBySessionKey(String sessionKey);
+
 }
