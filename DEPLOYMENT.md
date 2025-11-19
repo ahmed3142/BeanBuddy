@@ -20,6 +20,25 @@ Set these in your Render service environment (do NOT commit secrets):
 
 Notes:
 - `app.base-url` will be read from `APP_BASE_URL` if present. This is the URL SSLCommerz will use for callbacks. Make sure SSLCommerz is configured with this exact URL.
+# IMPORTANT: APP_BASE_URL is required
+# --------------------------------
+# The backend now requires `APP_BASE_URL` to be set in the environment. The app will fail fast at startup with a clear error message if this value is missing. This prevents silent misconfiguration where callbacks are routed to an unintended fallback URL.
+#
+# Local development / quick testing
+# - For local dev you can set APP_BASE_URL to `http://localhost:8081` before starting the backend:
+#
+# ```bash
+# export APP_BASE_URL=http://localhost:8081
+# ./mvnw spring-boot:run
+# ```
+#
+# - If you need a public HTTPS URL (so SSLCommerz sandbox can POST back to your machine), use ngrok or Cloudflare Tunnel and set APP_BASE_URL to the provided HTTPS URL:
+#
+# ```bash
+# ngrok http 8081 --host-header=rewrite
+# export APP_BASE_URL=https://<your-ngrok-subdomain>.ngrok-free.app
+# ./mvnw spring-boot:run
+# ```
 - Do NOT keep production credentials in `application.properties` in the repo. Use Render env vars and rotate any credentials that were previously committed.
 - Confirm network access from Render to your Supabase/Postgres instance.
 - Consider setting `SPRING_PROFILES_ACTIVE=prod` and maintaining a `application-prod.properties` for production-specific settings.
