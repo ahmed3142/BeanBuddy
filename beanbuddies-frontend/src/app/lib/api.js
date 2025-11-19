@@ -2,17 +2,15 @@
 
 // --- DYNAMIC API URL LOGIC ---
 
-// 1. Define both URLs
-// Eita apnar Render Backend URL (Production-er jonno)
-const PROD_API_URL = 'https://beanbuddy-2.onrender.com/api/v1'; 
+// 1. Define default URLs. Prefer environment variables in production.
+// Production API URL should be provided by Vercel as NEXT_PUBLIC_API_URL.
+const DEFAULT_PROD_API_URL = 'https://beanbuddy-2.onrender.com/api/v1';
+const DEV_API_URL = 'http://localhost:8081/api/v1';
 
-// Eita apnar Local Backend URL (Nijer computer-e kaj korar jonno)
-const DEV_API_URL = 'http://localhost:8081/api/v1'; 
-
-// 2. Check which environment we are in
-const API_URL = process.env.NODE_ENV === 'production' 
-    ? PROD_API_URL   // Vercel-e thakle Render use korbe
-    : DEV_API_URL;   // Local-e thakle Localhost use korbe
+// In production use NEXT_PUBLIC_API_URL if provided, otherwise fall back to the default.
+const API_URL = process.env.NODE_ENV === 'production'
+  ? (process.env.NEXT_PUBLIC_API_URL || DEFAULT_PROD_API_URL)
+  : DEV_API_URL;
 
 // --- END OF DYNAMIC LOGIC ---
 
