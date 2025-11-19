@@ -109,50 +109,87 @@ public class PaymentService {
 
     @Transactional
     public void validatePayment(Map<String, String> ipnData) {
-        // ... (ei method-e kono change nai) ...
+        // Be tolerant: accept different parameter names and status values, and fallback to session key lookup
         String receivedTransactionId = ipnData.get("tran_id");
-        String receivedStatus = ipnData.get("status");
+        String receivedStatusRaw = ipnData.getOrDefault("status", "");
+        String receivedStatus = receivedStatusRaw == null ? "" : receivedStatusRaw.toUpperCase();
 
-        PaymentTransaction transaction = transactionRepository.findByTransactionId(receivedTransactionId)
-                .orElse(null); 
+        // session key may be under 'sessionkey' or 'session_key'
+        String receivedSessionKey = ipnData.getOrDefault("sessionkey", ipnData.getOrDefault("session_key", ""));
+
+        PaymentTransaction transaction = null;
+        if (receivedTransactionId != null && !receivedTransactionId.isEmpty()) {
+            transaction = transactionRepository.findByTransactionId(receivedTransactionId).orElse(null);
+        }
+
+        if (transaction == null && receivedSessionKey != null && !receivedSessionKey.isEmpty()) {
+            transaction = transactionRepository.findBySessionKey(receivedSessionKey).orElse(null);
+        }
 
         if (transaction == null) {
-            System.err.println("IPN Error: Transaction not found with ID: " + receivedTransactionId);
+            System.err.println("IPN Error: Transaction not found. tran_id=" + receivedTransactionId + ", sessionkey=" + receivedSessionKey + ", fullPayload=" + ipnData);
             return;
         }
 
         if ("PAID".equals(transaction.getStatus())) {
-            System.out.println("IPN Info: Transaction already processed: " + receivedTransactionId);
+            System.out.println("IPN Info: Transaction already processed: " + transaction.getTransactionId());
             return;
         }
 
-        if (!"VALID".equals(receivedStatus)) {
+        // Accept a few variants of a successful/valid status from gateway
+        boolean isValidStatus = false;
+        if (receivedStatus != null) {
+            if (receivedStatus.contains("VALID") || receivedStatus.contains("SUCCESS") || receivedStatus.contains("COMPLETED")) {
+                isValidStatus = true;
+            }
+        }
+
+        if (!isValidStatus) {
             transaction.setStatus("FAILED");
             transactionRepository.save(transaction);
-            System.err.println("IPN Info: Transaction failed with status: " + receivedStatus);
+            System.err.println("IPN Info: Transaction failed with status: " + receivedStatusRaw + " for tx=" + transaction.getTransactionId());
             return;
         }
 
+        // Parse and compare amounts with a small tolerance
+        String amountStr = ipnData.get("amount");
+        double receivedAmount;
         try {
-            Double receivedAmount = Double.parseDouble(ipnData.get("amount"));
-            
-            if (transaction.getAmount().equals(receivedAmount)) {
-                
-                transaction.setStatus("PAID");
-                transactionRepository.save(transaction);
-
-                enrollmentService.enrollStudent(transaction.getCourse().getId(), transaction.getStudent());
-                System.out.println("SUCCESS: Payment validated (IPN Only) and user enrolled for transaction: " + receivedTransactionId);
-
-            } else {
-                transaction.setStatus("FAILED");
-                transactionRepository.save(transaction);
-                System.err.println("IPN Error: Amount mismatch. DB Amount: " + transaction.getAmount() + ", IPN Amount: " + receivedAmount);
-            }
+            receivedAmount = Double.parseDouble(amountStr);
         } catch (Exception e) {
             transaction.setStatus("FAILED");
             transactionRepository.save(transaction);
-            System.err.println("IPN Error: Exception during IPN processing: " + e.getMessage());
+            System.err.println("IPN Error: Unable to parse amount from IPN: '" + amountStr + "' for tx=" + transaction.getTransactionId());
+            return;
+        }
+
+        Double dbAmountObj = transaction.getAmount();
+        if (dbAmountObj == null) {
+            transaction.setStatus("FAILED");
+            transactionRepository.save(transaction);
+            System.err.println("IPN Error: DB amount missing for tx=" + transaction.getTransactionId());
+            return;
+        }
+
+        double dbAmount = dbAmountObj.doubleValue();
+        double diff = Math.abs(dbAmount - receivedAmount);
+        final double TOLERANCE = 0.01; // allow minor floating rounding differences
+
+        if (diff <= TOLERANCE) {
+            transaction.setStatus("PAID");
+            transactionRepository.save(transaction);
+
+            // enroll student after successful payment
+            try {
+                enrollmentService.enrollStudent(transaction.getCourse().getId(), transaction.getStudent());
+                System.out.println("SUCCESS: Payment validated (IPN) and user enrolled for transaction: " + transaction.getTransactionId());
+            } catch (Exception e) {
+                System.err.println("IPN Warning: enrollment failed for tx=" + transaction.getTransactionId() + ", error=" + e.getMessage());
+            }
+        } else {
+            transaction.setStatus("FAILED");
+            transactionRepository.save(transaction);
+            System.err.println("IPN Error: Amount mismatch. DB Amount: " + dbAmount + ", IPN Amount: " + receivedAmount + " for tx=" + transaction.getTransactionId());
         }
     }
 
